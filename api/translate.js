@@ -18,27 +18,29 @@ export default async function handler(req, res) {
   }
 
   try {
-    const response = await fetch('https://libretranslate.de/translate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        q: text,
-        source: 'en',
-        target: 'de',
-        format: 'text',
-      }),
-    });
+  const response = await fetch('https://libretranslate.de/translate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      q: text,
+      source: 'en',
+      target: 'de',
+      format: 'text',
+    }),
+  });
 
-    if (!response.ok) {
-      const errText = await response.text();
-      console.error('Fehler von LibreTranslate:', errText);
-      return res.status(500).json({ error: 'Übersetzung fehlgeschlagen', details: errText });
-    }
+  const textResponse = await response.text();
 
-    const data = await response.json();
-    return res.status(200).json(data);
-  } catch (error) {
-    console.error('Serverfehler im Proxy:', error);
-    return res.status(500).json({ error: 'Serverfehler', details: error.message });
+  if (!response.ok) {
+    console.error('Fehler von LibreTranslate:', textResponse);
+    return res.status(500).json({ error: 'Übersetzung fehlgeschlagen', details: textResponse });
   }
+
+  const data = JSON.parse(textResponse);
+  return res.status(200).json(data);
+
+} catch (error) {
+  console.error('Serverfehler im Proxy:', error);
+  return res.status(500).json({ error: 'Serverfehler', details: error.message });
+}
 }
