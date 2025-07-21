@@ -20,15 +20,10 @@ export default async function handler(req, res) {
   }
 
   // Weiterleitung an deinen LibreTranslate-Server (z. B. lokal oder öffentlich)
-  const response = await fetch("https://libretranslate.de/translate", {
+    try {const response = await fetch("https://libretranslate.de/translate", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      q: text,
-      source: "en",
-      target: "de",
-      format: "text"
-    })
+    body: JSON.stringify({ text })
   });
 
   if (!response.ok) {
@@ -37,4 +32,8 @@ export default async function handler(req, res) {
 
   const data = await response.json();
   res.status(200).json(data);
+} catch (error) {
+    // Auch hier CORS-Header setzen und Fehler zurückgeben
+    return res.status(500).json({ error: "Serverfehler", details: error.message });
+  }
 }
