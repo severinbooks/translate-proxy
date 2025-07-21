@@ -1,11 +1,9 @@
 export default async function handler(req, res) {
-  // CORS Header immer setzen
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if (req.method === 'OPTIONS') {
-    // Preflight anfragen OK antworten
     return res.status(200).end();
   }
 
@@ -32,12 +30,15 @@ export default async function handler(req, res) {
     });
 
     if (!response.ok) {
-      return res.status(500).json({ error: 'Übersetzung fehlgeschlagen' });
+      const errText = await response.text();
+      console.error('Fehler von LibreTranslate:', errText);
+      return res.status(500).json({ error: 'Übersetzung fehlgeschlagen', details: errText });
     }
 
     const data = await response.json();
     return res.status(200).json(data);
   } catch (error) {
+    console.error('Serverfehler im Proxy:', error);
     return res.status(500).json({ error: 'Serverfehler', details: error.message });
   }
 }
